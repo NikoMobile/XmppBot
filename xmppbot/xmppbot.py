@@ -230,14 +230,18 @@ class XmppBot(BaseBot):
             user = msg['from'].resource
 
         try:
-            reply = cmd(*args, user=user, text=text, msg=msg)
+            replies = cmd(*args, user=user, text=text, msg=msg)
+            if type(replies) == str:
+                self.reply_message(msg, replies, *args, **msg)
+            else:
+                for reply in replies:
+                    if reply:
+                        self.reply_message(msg, reply, *args, **msg)
         except Exception as error:
             self.log.exception('An error happened while processing '
                                'the message: %s' % text)
             reply = self.command_error(
                 error, *args, user=user, text=text, msg=msg)
-        if reply:
-            self.reply_message(msg, reply, *args, **msg)
 
     def command_error(self, *args, **kwargs):
         return self.MSG_ERROR_OCCURRED
